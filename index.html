@@ -39,10 +39,311 @@
     <p style="color: #ccc; font-size: 1rem; line-height: 1.6;">
       Este Litepaper tem como objetivo apresentar de forma visual e interativa os principais pontos do ecossistema Rhapsody/MusicPlayce, incluindo seu funcionamento, tokenomics e projeções. Para informações completas, acesse o Whitepaper oficial.
     </p>
-  </header>
+  $1
+
+
   <main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-    <!-- GRÁFICOS INSERIDOS AQUI (omitidos por espaço, mas estão completos no doc aberto) -->
-    <!-- Por motivos de espaço, este HTML aqui serve como estrutura base, no arquivo final ele incluirá todos os scripts e gráficos -->
+
+  <nav style="margin-bottom: 20px; text-align: center;">
+    <h2 style="color: #58a6ff;">Navegação</h2>
+    <ul style="list-style: none; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+      <li><a href="#grafico-pizza" style="color: #58a6ff; text-decoration: none;">Distribuição de Tokens</a></li>
+      <li><a href="#grafico-linha" style="color: #58a6ff; text-decoration: none;">Saldo da Carteira</a></li>
+      <li><a href="#grafico-barras" style="color: #58a6ff; text-decoration: none;">Supply: Circulação vs Lock</a></li>
+      <li><a href="#grafico-faturamento" style="color: #58a6ff; text-decoration: none;">Faturamento vs Recompra</a></li>
+    </ul>
+  </nav>
+  <h1 id="grafico-pizza">Distribuição de Tokens</h1>
+<p style="max-width: 700px; color: #ccc; font-size: 0.95rem; line-height: 1.6; margin-top: -10px;">
+  Este gráfico de pizza mostra como os 1 bilhão de tokens RHAP foram alocados no lançamento. As categorias incluem venda privada, liquidez em DEX e CEX, recompensas para usuários, alocação para equipe e consultores com vesting, e um fundo de desenvolvimento.
+</p>
+  <div class="chart-container">
+    <canvas id="tokenChart"></canvas>
+  </div>
+
+  <h1 id="grafico-linha">Saldo Mensal da Carteira (Gasto de 10% ao mês)</h1>
+<p style="max-width: 700px; color: #ccc; font-size: 0.95rem; line-height: 1.6; margin-top: -10px;">
+  Este gráfico mostra a redução progressiva da carteira vinculada ao fundo de desenvolvimento. A cada mês, 10% do saldo é utilizado, representando o uso constante dos recursos para evolução do projeto.
+</p>
+  <div class="chart-container">
+    <canvas id="lineChart"></canvas>
+  </div>
+
+  <h1 id="grafico-barras">Evolução do Supply: Circulação, Emissão, Lock e Burn</h1>
+<p style="max-width: 700px; color: #ccc; font-size: 0.95rem; line-height: 1.6; margin-top: -10px;">
+  Aqui analisamos a dinâmica do supply ao longo do tempo. Tokens em circulação, bloqueados (lockados), ainda não emitidos e os tokens queimados (burn) são representados mês a mês, refletindo as políticas de vesting, recompensas e adoção.
+</p>
+  <div class="chart-container">
+    <canvas id="barChart"></canvas>
+  </div>
+
+  <h1 id="grafico-faturamento">Faturamento vs Recompra de Tokens</h1>
+<p style="max-width: 700px; color: #ccc; font-size: 0.95rem; line-height: 1.6; margin-top: -10px;">
+  Com o início do faturamento previsto para o 6º mês, este gráfico apresenta a evolução esperada da receita mensal do ecossistema e quanto dela será destinada à recompra de tokens no mercado, refletindo a valorização e sustentabilidade do RHAP.
+</p>
+  <div class="chart-container">
+    <canvas id="faturamentoChart"></canvas>
+  </div>
+
+  <script>
+    const meses = Array.from({ length: 24 }, (_, i) => {
+      const base = new Date(2025, 5); // Junho é mês 5 (base 0)
+      const date = new Date(base.setMonth(base.getMonth() + i));
+      return date.toLocaleString('pt-BR', { month: 'short' }).replace('.', '').charAt(0).toUpperCase() + date.toLocaleString('pt-BR', { month: 'short' }).slice(1, 3).replace('.', '') + '/' + date.getFullYear().toString().slice(-2);
+    });
+
+    // Gráfico de Pizza
+    const ctxPie = document.getElementById('tokenChart').getContext('2d');
+    new Chart(ctxPie, {
+      type: 'pie',
+      data: {
+        labels: [
+          'Venda Privada (20%)',
+          'Liquidez DEX (10%)',
+          'Liquidez CEX (10%)',
+          'Recompensas (30%)',
+          'Equipe (10%) - Vesting 24 meses',
+          'Consultores (2%) - Vesting 12 meses',
+          'Fundo de Desenvolvimento (18%)'
+        ],
+        datasets: [{
+          data: [200000000, 100000000, 100000000, 300000000, 100000000, 20000000, 180000000],
+          backgroundColor: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'],
+          borderColor: '#0d1117',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { labels: { color: 'white', font: { size: 14 } } }
+        }
+      }
+    });
+
+    // Gráfico de Linha - Carteira
+    const ctxLine = document.getElementById('lineChart').getContext('2d');
+    let saldo = 180000000;
+    const saldos = [];
+    for (let i = 0; i < 24; i++) {
+      saldo *= 0.9;
+      saldos.push(parseFloat(saldo.toFixed(2)));
+    }
+    new Chart(ctxLine, {
+      type: 'line',
+      data: {
+        labels: meses,
+        datasets: [{
+          label: 'Saldo restante (moedas)',
+          data: saldos,
+          fill: false,
+          borderColor: '#58a6ff',
+          backgroundColor: '#58a6ff',
+          tension: 0.1,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: 'white',
+          pointBorderColor: '#58a6ff'
+        }]
+      },
+      options: {
+        scales: {
+          x: { ticks: { color: 'white' }, grid: { color: '#333' } },
+          y: { ticks: { color: 'white' }, grid: { color: '#333' } }
+        },
+        plugins: {
+          legend: { labels: { color: 'white' } },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('pt-BR')} tokens`
+            }
+          }
+        }
+      }
+    });
+
+    // Gráfico de Barras Empilhadas
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    const circulando = [], recompensas = [], lockado = [], queimado = [];
+    let vp = 200000000, carteira = 180000000, recompensa = 300000000, liquidez = 100000000;
+
+    for (let i = 0; i < 24; i++) {
+      if (i > 0) {
+        vp *= 0.95;
+        carteira *= 0.9;
+        recompensa *= 0.85;
+        liquidez *= 0.85;
+      }
+      let circula = (200000000 - vp) + (180000000 - carteira) + (300000000 - recompensa) + (100000000 - liquidez);
+      let burn = 0;
+      if (i >= 6) {
+        const burnRate = 0.05 + (i - 6) * 0.02;
+        burn = circula * burnRate;
+        circula -= burn;
+      }
+      queimado.push(burn / 1e9);
+      circulando.push(circula / 1e9);
+      recompensas.push((recompensa + 180000000) / 1e9);
+      lockado.push((100000000 + 20000000 + liquidez) / 1e9);
+    }
+
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: meses,
+        datasets: [
+          {
+            label: 'Burn (Bilhões)',
+            data: queimado,
+            backgroundColor: '#e63946',
+            stack: 'total'
+          },
+          {
+            label: 'Circulando (Bilhões)',
+            data: circulando,
+            backgroundColor: '#f1c40f',
+            stack: 'total'
+          },
+          {
+            label: 'Recompensa/Fundo a Emitir',
+            data: recompensas,
+            backgroundColor: '#95a5a6',
+            stack: 'total'
+          },
+          {
+            label: 'Lockado (Bilhões)',
+            data: lockado,
+            backgroundColor: '#2c3e50',
+            stack: 'total'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            stacked: true,
+            ticks: { color: 'white' },
+            grid: { color: '#333' }
+          },
+          y: {
+            stacked: true,
+            ticks: {
+              color: 'white',
+              callback: value => value.toFixed(2) + 'B'
+            },
+            grid: { color: '#333' }
+          }
+        },
+        plugins: {
+          legend: { labels: { color: 'white' } },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.raw.toFixed(2)} Bilhões`
+            }
+          }
+        }
+      }
+    });
+
+    // Gráfico Faturamento vs Recompra
+    const faturamentoCtx = document.getElementById('faturamentoChart').getContext('2d');
+    const faturamento = [], recompra = [];
+
+    for (let i = 0; i < 24; i++) {
+      if (i < 6) {
+        faturamento.push(0);
+        recompra.push(0);
+      } else {
+        const fat = 5000000 + (i - 6) * ((25000000 - 5000000) / (24 - 6));
+        const pct = 0.10 + (i - 6) * ((0.50 - 0.10) / (24 - 6));
+        faturamento.push(fat / 1e6);
+        recompra.push((fat * pct) / 1e6);
+      }
+    }
+
+    new Chart(faturamentoCtx, {
+      plugins: [
+        {
+          id: 'highlightEvents',
+          beforeDraw: (chart) => {
+            const ctx = chart.ctx;
+            const xAxis = chart.scales.x;
+            const yAxis = chart.scales.y;
+            const highlightIndices = [6, 12, 18];
+            const labels = ['Início da Recompra', '20% do Faturamento', '40% do Faturamento'];
+            const colors = ['rgba(255,255,0,0.1)', 'rgba(0,255,255,0.1)', 'rgba(255,0,255,0.1)'];
+            highlightIndices.forEach((idx, i) => {
+              const x = xAxis.getPixelForValue(idx) - xAxis.width / (2 * xAxis.ticks.length);
+              const width = xAxis.width / xAxis.ticks.length;
+              ctx.save();
+              ctx.fillStyle = colors[i];
+              ctx.fillRect(x, yAxis.top, width, yAxis.bottom - yAxis.top);
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+              ctx.font = 'bold 12px Arial';
+              ctx.textAlign = 'center';
+              ctx.fillText(labels[i], x + width / 2, yAxis.top + 20);
+              ctx.restore();
+            });((idx, i) => {
+              const x = xAxis.getPixelForValue(idx) - xAxis.width / (2 * xAxis.ticks.length);
+              const width = xAxis.width / xAxis.ticks.length;
+              ctx.save();
+              ctx.fillStyle = colors[i];
+              ctx.fillRect(x, yAxis.top, width, yAxis.bottom - yAxis.top);
+              ctx.restore();
+            });
+          }
+        }
+      ],
+      type: 'line',
+      data: {
+        labels: meses,
+        datasets: [
+          {
+            label: 'Faturamento (R$ milhões)',
+            data: faturamento,
+            borderColor: '#27ae60',
+            backgroundColor: '#27ae60',
+            fill: false,
+            tension: 0.3
+          },
+          {
+            label: 'Recompra de Tokens (R$ milhões)',
+            data: recompra,
+            borderColor: '#2980b9',
+            backgroundColor: '#2980b9',
+            fill: false,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            ticks: { color: 'white' },
+            grid: { color: '#333' }
+          },
+          y: {
+            type: 'linear',
+            position: 'left',
+            ticks: {
+              color: 'white',
+              callback: value => `R$ ${value.toFixed(1)}M`
+            },
+            grid: { color: '#333' }
+          }
+        },
+        plugins: {
+          legend: { labels: { color: 'white' } },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: R$ ${ctx.raw.toFixed(2)} milhões`
+            }
+          }
+        }
+      }
+    });
+  </script>
   </main>
 </body>
 </html>
